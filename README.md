@@ -39,14 +39,14 @@ docker build -t visit-scheduler:dev --target=dev .
 Run locally:
 
 ```shell
-poetry run uvicorn --reload visit_scheduler.app.main:app --port 8080
+poetry run uvicorn --reload user_chat.app.main:app --port 8080
  ```
 
 Run the dev image with hot reload:
 
 ```shell
 docker run -it --env-file=.env \
-    --mount type=bind,src=$(pwd)/visit_scheduler,dst=/app/visit_scheduler \
+    --mount type=bind,src=$(pwd)/user_chat,dst=/app/user_chat \
     visit-scheduler:dev
 ```
 
