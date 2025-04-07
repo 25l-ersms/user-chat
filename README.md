@@ -23,10 +23,10 @@ VIRTUAL_ENV=.venv poetry install --with dev
 
 ```shell
 # production environment
-docker build -t visit-scheduler:latest --target=prod .
+docker build -t user-chat:latest --target=prod .
 
 # development environemnt (includes pytest, ruff, mypy and hot-reload)
-docker build -t visit-scheduler:dev --target=dev .
+docker build -t user-chat:dev --target=dev .
 ```
 
 ### Development
@@ -47,13 +47,13 @@ Run the dev image with hot reload:
 ```shell
 docker run -it --env-file=.env \
     --mount type=bind,src=$(pwd)/user_chat,dst=/app/user_chat \
-    visit-scheduler:dev
+    user_chat:dev
 ```
 
 Run the prod image:
 
 ```shell
-docker run -it --env-file=.env visit-scheduler:latest
+docker run -it --env-file=.env user_chat:latest
 ```
 
 #### Contributing
