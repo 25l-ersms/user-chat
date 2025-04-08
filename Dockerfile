@@ -19,7 +19,7 @@ COPY pyproject.toml poetry.lock ./
 
 RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --without dev
 
-COPY user_chat ./visit_scheduler
+COPY user_chat ./user_chat
 
 FROM python:$PYTHON_VERSION AS prod
 
@@ -28,7 +28,7 @@ ENV PATH=$VIRTUAL_ENV/bin:$PATH
 
 COPY docker/entrypoint.sh entrypoint.sh
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
-COPY --from=builder /app/visit_scheduler visit_scheduler
+COPY --from=builder /app/user_chat user_chat
 
 EXPOSE 8080
 
@@ -42,7 +42,7 @@ ENV VIRTUAL_ENV=/app/.venv
 COPY docker/entrypoint.sh entrypoint.sh
 RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --with dev
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
-COPY --from=builder /app/visit_scheduler visit_scheduler
+COPY --from=builder /app/user_chat user_chat
 
 EXPOSE 8080
 

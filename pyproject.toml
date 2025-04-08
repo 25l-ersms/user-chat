@@ -6,7 +6,7 @@ authors = [
     {name = "kfijalkowski1", email = "k.1.fijalkowski@gmail.com"}
 ]
 packages = [
-    { include = "visit_scheduler" }
+    { include = "user_chat" }
 ]
 license = "MIT"
 requires-python = ">=3.11"
@@ -24,8 +24,8 @@ package-mode = false
 pytest = "^8.3.5"
 ruff = "^0.11.2"
 mypy = "^1.15.0"
-kubernetes-stubs = "^22.6.0.post1"
 pre-commit = "^4.2.0"
+kubernetes-stubs = "^22.6.0.post1"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
