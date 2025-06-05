@@ -29,3 +29,19 @@ def read_all(db: firestore.Client) -> list[dict[str, Any] | None]:  # type: igno
     users_ref = db.collection("users")
     docs = users_ref.stream()
     return [doc.to_dict() for doc in docs]
+
+
+def send_message(db: firestore.Client, message: dict) -> None:
+    """
+    Send a message by adding it to the Firestore database.
+    """
+    db.collection("messages").add(message)
+
+
+def get_messages(db: firestore.Client, user_id: str) -> list[dict[str, Any]]:
+    """
+    Retrieve all messages for a specific user.
+    """
+    messages_ref = db.collection("messages").where("receiver_id", "==", user_id)
+    docs = messages_ref.stream()
+    return [doc.to_dict() for doc in docs]

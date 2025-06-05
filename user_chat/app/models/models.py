@@ -1,12 +1,16 @@
 from pydantic import BaseModel
+from datetime import datetime
 
 
-class InsertModel(BaseModel):  # TODO change to real model, this is just a placeholder
+class UserModel(BaseModel):
+    user_id: str
     name: str
-    age: int
+    email: str
 
 
-class SearchModel(BaseModel):  # TODO change to real model, this is just a placeholder
-    query: str
-    page: int = 1
-    per_page: int = 10
+class MessageModel(BaseModel):
+    message_id: str
+    sender_id: str
+    receiver_id: str
+    content: str
+    timestamp: datetime
