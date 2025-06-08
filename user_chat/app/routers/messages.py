@@ -1,9 +1,9 @@
 import os
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Header
+from fastapi import APIRouter, Depends, HTTPException, Header, WebSocket, WebSocketDisconnect
 from google.cloud import firestore  # type: ignore
-from jose import jwt, JWTError
+from jose import jwt, JWTError, ExpiredSignatureError
 
 from user_chat.firebase_utils.firebase_connector import add_sample, get_client, read_all, send_message, get_messages
 from user_chat.app.models.models import MessageModel
@@ -51,7 +51,12 @@ async def send_message_endpoint(
         raise HTTPException(status_code=401, detail="Invalid authorization header format")
     
     token = authorization.split("Bearer ")[1]
-    payload = decode_jwt(token)
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    except ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Session expired. Please login again.")
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
 
     # Extract user_id from the token payload
     user_id = payload.get("sub")
@@ -64,6 +69,10 @@ async def send_message_endpoint(
 
     # Send the message
     send_message(db, message.dict())
+
+    # Broadcast the message to all connected WebSocket clients
+    for client in connected_clients:
+        await client.send_json(message.dict())
 
 
 #@router.get("/messages/{user_id}", response_model=list[MessageModel])
@@ -83,7 +92,12 @@ async def get_messages_endpoint(
         raise HTTPException(status_code=401, detail="Invalid authorization header format")
     
     token = authorization.split("Bearer ")[1]
-    payload = decode_jwt(token)
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    except ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Session expired. Please login again.")
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
 
     # Extract user_id from the token payload
     user_id = payload.get("sub")
@@ -98,3 +112,21 @@ async def get_messages_endpoint(
     sent_messages = [doc.to_dict() for doc in messages_ref]
     received_messages = [doc.to_dict() for doc in received_messages_ref]
     return sent_messages + received_messages
+
+# Store connected clients
+connected_clients = []
+
+@router.websocket("/ws/chat")
+async def websocket_endpoint(websocket: WebSocket):
+    """
+    WebSocket endpoint for real-time chat updates.
+    """
+    await websocket.accept()
+    connected_clients.append(websocket)
+    try:
+        while True:
+            # Wait for messages from the client (optional)
+            data = await websocket.receive_text()
+            print(f"Received message: {data}")
+    except WebSocketDisconnect:
+        connected_clients.remove(websocket)
